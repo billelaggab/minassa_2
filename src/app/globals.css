@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-dark: #0a0d14;
+    --card-dark: #111622;
+    --border-dark: #1e293b;
+    --accent-gold: #f59e0b;
+    --accent-red: #ef4444;
+    --accent-emerald: #10b981;
+    --accent-cyan: #06b6d4;
+  }
+
+  body {
+    background-color: #0b0f19;
+    color: #e2e8f0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Cairo", "Noto Sans Arabic", Tahoma, sans-serif;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Classified Watermark styling */
+.classified-watermark-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: rgba(239, 68, 68, 0.08);
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 0.25em;
+  user-select: none;
+  z-index: 10;
+  text-transform: uppercase;
+}
+
+/* Print Stylesheet for Dossiers */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm 12mm 15mm 12mm;
+  }
+
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .dossier-print-container {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .print-break-inside-avoid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-page-break {
+    break-before: page !important;
+    page-break-before: always !important;
+  }
+
+  .print-classified-border {
+    border: 2px solid #991b1b !important;
+  }
+
+  .print-watermark {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-40deg);
+    font-size: 42pt;
+    font-weight: bold;
+    color: rgba(185, 28, 28, 0.12) !important;
+    z-index: 9999;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .print-badge {
+    border: 1px solid #374151 !important;
+    color: #000000 !important;
+    background: #f3f4f6 !important;
+  }
+}

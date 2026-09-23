@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>ملف استقصائي مصنف - {{ person.primary_name }}</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 20mm 15mm 20mm 15mm;
+      @bottom-center {
+        content: "سري للغاية // TOP SECRET - صفحة " counter(page) " من " counter(pages);
+        font-size: 8pt;
+        color: #7f1d1d;
+        font-family: 'Noto Sans Arabic', Tahoma, sans-serif;
+      }
+    }
+
+    body {
+      font-family: 'Noto Sans Arabic', 'DejaVu Sans', Arial, sans-serif;
+      direction: rtl;
+      color: #111827;
+      background: #ffffff;
+      margin: 0;
+      padding: 0;
+      font-size: 10pt;
+      line-height: 1.5;
+    }
+
+    .watermark {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-45deg);
+      font-size: 44pt;
+      font-weight: bold;
+      color: rgba(185, 28, 28, 0.08);
+      z-index: -100;
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-family: monospace;
+    }
+
+    .header-banner {
+      border-bottom: 2px solid #991b1b;
+      padding-bottom: 12px;
+      margin-bottom: 18px;
+    }
+
+    .classification-tag {
+      display: inline-block;
+      border: 2px solid #b91c1c;
+      color: #b91c1c;
+      font-weight: bold;
+      padding: 3px 8px;
+      font-size: 8pt;
+      letter-spacing: 1px;
+    }
+
+    .person-header-table {
+      width: 100%;
+      margin-bottom: 16px;
+      border-collapse: collapse;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .person-header-table td {
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    .avatar-cell {
+      width: 100px;
+      text-align: center;
+    }
+
+    .avatar-img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border: 1px solid #9ca3af;
+    }
+
+    .meta-grid {
+      display: table;
+      width: 100%;
+      margin-top: 6px;
+      font-size: 9pt;
+    }
+
+    .meta-row {
+      display: table-row;
+    }
+
+    .meta-cell-label {
+      display: table-cell;
+      font-weight: bold;
+      color: #4b5563;
+      width: 25%;
+      padding: 2px 0;
+    }
+
+    .meta-cell-val {
+      display: table-cell;
+      color: #111827;
+      padding: 2px 0;
+    }
+
+    .section-title {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #1f2937;
+      border-bottom: 1px solid #d1d5db;
+      padding-bottom: 4px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      page-break-after: avoid;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.5pt;
+      margin-bottom: 14px;
+      page-break-inside: avoid;
+    }
+
+    table.data-table th {
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      padding: 6px;
+      text-align: right;
+      font-weight: bold;
+    }
+
+    table.data-table td {
+      border: 1px solid #e5e7eb;
+      padding: 6px;
+      text-align: right;
+    }
+
+    .note-box {
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      border-right: 3px solid #6b21a8;
+      page-break-inside: avoid;
+    }
+
+    .note-header {
+      font-weight: bold;
+      font-size: 9pt;
+      color: #111827;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .hash-text {
+      font-family: monospace;
+      font-size: 7.5pt;
+      color: #374151;
+      word-break: break-all;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Security Watermark -->
+  <div class="watermark">{{ watermark }}</div>
+
+  <!-- Top Header Banner -->
+  <div class="header-banner">
+    <table style="width: 100%;">
+      <tr>
+        <td style="text-align: right;">
+          <h1 style="margin: 0; font-size: 16pt; color: #111827;">ملف تحقيق استقصائي جنائي</h1>
+          <p style="margin: 3px 0 0 0; font-size: 8.5pt; color: #6b7280;">
+            تاريخ التصدير: {{ export_date }} | رقم الإيداع: DOS-{{ person.id }}
+          </p>
+        </td>
+        <td style="text-align: left; vertical-align: middle;">
+          <div class="classification-tag">
+            {% if person.sensitivity_level == 'top_secret' %}
+              سري للغاية // TOP SECRET
+            {% else %}
+              سري ومحمي // CONFIDENTIAL
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Person Core Information -->
+  <table class="person-header-table">
+    <tr>
+      {% if person.avatar_url %}
+      <td class="avatar-cell">
+        <img src="{{ person.avatar_url }}" class="avatar-img" alt="Subject" />
+      </td>
+      {% endif %}
+      <td>
+        <h2 style="margin: 0 0 4px 0; font-size: 13pt; color: #111827;">{{ person.primary_name }}</h2>
+        <div style="font-size: 9pt; color: #b45309; font-weight: bold; margin-bottom: 6px;">
+          {{ person.occupation or 'بدون غطاء محدد' }}
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-row">
+            <span class="meta-cell-label">الجنسية:</span>
+            <span class="meta-cell-val">{{ person.nationality or '—' }}</span>
+            <span class="meta-cell-label">تاريخ الميلاد:</span>
+            <span class="meta-cell-val">{{ person.dob or '—' }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-cell-label">العنوان الحالي:</span>
+            <span class="meta-cell-val" colspan="3">{{ person.address or 'غير معروف' }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-cell-label">مستوى الموثوقية:</span>
+            <span class="meta-cell-val">{{ person.reliability_rating }} من 5 نجوم</span>
+            <span class="meta-cell-label">الحالة الاستقصائية:</span>
+            <span class="meta-cell-val">{{ person.status }}</span>
+          </div>
+        </div>
+
+        {% if person.summary %}
+        <div style="margin-top: 8px; font-size: 8.5pt; color: #374151; border-top: 1px dashed #d1d5db; padding-top: 6px;">
+          <strong>خلاصة التحقيق:</strong> {{ person.summary }}
+        </div>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
+
+  <!-- Contact Channels Section -->
+  <div class="section-title">أولاً: قنوات الاتصال والاستهداف الرقمي</div>
+  {% if contacts %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width: 20%;">نوع القناة</th>
+        <th style="width: 35%;">القيمة / المعرف</th>
+        <th style="width: 20%;">التصنيف</th>
+        <th style="width: 25%;">ملاحظات التشفير والشبكة</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in contacts %}
+      <tr>
+        <td>{{ c.channel_type }}</td>
+        <td style="font-family: monospace;">{{ c.value }}</td>
+        <td>{{ c.label or '—' }}</td>
+        <td>{{ c.carrier_notes or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="font-size: 8.5pt; color: #6b7280;">لا توجد قنوات اتصال مسجلة.</p>
+  {% endif %}
+
+  <!-- Intelligence Notes Section -->
+  <div class="section-title">ثانياً: سجل الوقائع والملاحظات الميدانية (تسلسل زمني)</div>
+  {% if notes %}
+    {% for n in notes %}
+    <div class="note-box">
+      <div class="note-header">
+        <span>{{ loop.index }}. {{ n.title }}</span>
+        <span style="font-size: 8pt; color: #6b7280;">تاريخ الحدث: {{ n.event_date or 'غير محدد' }}</span>
+      </div>
+      <div style="font-size: 8.5pt; color: #374151; white-space: pre-line;">
+        {{ n.content }}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <p style="font-size: 8.5pt; color: #6b7280;">لا توجد ملاحظات أو تم حجبها بموجب خيارات التنقيح.</p>
+  {% endif %}
+
+  <!-- Cryptographic Attachments -->
+  {% if attachments %}
+  <div class="section-title">ثالثاً: فهرس الأحراز وسلسلة الحيازة الجنائية (SHA-256)</div>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>اسم الوثيقة</th>
+        <th>نوع الملف</th>
+        <th>بصمة التشفير الجنائي SHA-256</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in attachments %}
+      <tr>
+        <td style="font-weight: bold;">{{ a.original_filename }}</td>
+        <td>{{ a.mime_type }} ({{ (a.file_size / 1024)|round(1) }} KB)</td>
+        <td class="hash-text">{{ a.sha256_hash }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <!-- End of Report Seal -->
+  <div style="margin-top: 30px; border-top: 1px solid #111827; padding-top: 10px; font-size: 8pt; display: flex; justify-content: space-between;">
+    <div>
+      <strong>نظام الاستقصاء وإدارة المعلومات الجنائية (CIIS)</strong><br />
+      وحدة التوثيق الميداني • خادم محلي مغلق (Air-Gapped)
+    </div>
+    <div style="text-align: left; font-family: monospace;">
+      STATUS: VERIFIED SECURE<br />
+      CHECKSUM COMPLIANT
+    </div>
+  </div>
+
+</body>
+</html>

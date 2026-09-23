@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # Database Service (PostgreSQL 15)
+  # ==========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: ciis_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: investigative_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: SecretInvestigativePassword2026!
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d investigative_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # Search Engine Service (Meilisearch)
+  # ==========================================
+  meilisearch:
+    image: getmeili/meilisearch:v1.8
+    container_name: ciis_meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: InvestigativeMasterKey2026_AirGapped
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - meili_data:/meili_data
+    networks:
+      - internal_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # FastAPI Backend & PDF Engine Service
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ciis_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:SecretInvestigativePassword2026!@postgres:5432/investigative_db
+      MEILISEARCH_URL: http://meilisearch:7700
+      MEILISEARCH_MASTER_KEY: InvestigativeMasterKey2026_AirGapped
+      STORAGE_DIR: /app/storage/uploads
+    volumes:
+      - evidence_storage:/app/storage/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    networks:
+      - internal_net
+
+  # ==========================================
+  # Frontend Application (Next.js RTL UI)
+  # ==========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ciis_frontend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://postgres:SecretInvestigativePassword2026!@postgres:5432/investigative_db
+      NEXT_PUBLIC_APP_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal_net
+
+  # ==========================================
+  # Nginx Hardened Reverse Proxy (Gateway)
+  # Only this service exposes ports to host/LAN
+  # ==========================================
+  nginx:
+    image: nginx:alpine
+    container_name: ciis_gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - internal_net
+
+# ==========================================
+# Persistent Volumes (Encrypted / Air-Gapped)
+# ==========================================
+volumes:
+  postgres_data:
+    name: ciis_postgres_data
+  meili_data:
+    name: ciis_meili_data
+  evidence_storage:
+    name: ciis_evidence_storage
+
+# ==========================================
+# Isolated Internal Bridge Network
+# ==========================================
+networks:
+  internal_net:
+    name: ciis_internal_network
+    driver: bridge
